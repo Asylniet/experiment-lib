@@ -1,18 +1,19 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
 
-from admin_views import (
+from .admin_views import (
     AdminProjectViewSet,
     AdminExperimentViewSet,
     AdminVariantViewSet,
     AdminProjectUserViewSet,
     AdminDistributionViewSet
 )
-from library_views import (
+from .library_views import (
     ExperimentVariantAPIView,
-    UserExperimentsAPIView
+    UserExperimentsAPIView, UserIdentifyAPIView
 )
+from .token_views import CustomTokenObtainPairView
 
 # Create a router for admin viewsets
 admin_router = DefaultRouter()
@@ -24,21 +25,26 @@ admin_router.register(r'distributions', AdminDistributionViewSet)
 
 urlpatterns = [
     # Admin API endpoints (JWT protected)
-    path('admin/api/', include(admin_router.urls)),
+    path('admin/', include(admin_router.urls)),
 
     # JWT authentication endpoints
-    path('admin/api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('admin/api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('admin/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('admin/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     # Library API endpoints (API key protected)
     path(
-        'api/experiment/<str:experiment_key>/variant',
+        'experiments/<str:experiment_key>/variant',
         ExperimentVariantAPIView.as_view(),
         name='experiment_variant'
     ),
     path(
-        'api/experiments',
+        'experiments',
         UserExperimentsAPIView.as_view(),
         name='user_experiments'
+    ),
+    path(
+        'users/identify',
+        UserIdentifyAPIView.as_view(),
+        name='user_identify'
     ),
 ]

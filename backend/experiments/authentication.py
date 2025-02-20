@@ -51,7 +51,14 @@ class ProjectAuthMiddleware:
     def __call__(self, request):
         # Process the request before the view is called
         # The project will be set by the APIKeyAuthentication class
-        request.project = getattr(request, 'auth', None)
+
+        api_key = request.headers.get('X-API-KEY')
+        if api_key is not None:
+            try:
+                project = Project.objects.get(api_key=api_key)
+                request.project = project
+            except Project.DoesNotExist:
+                pass
 
         response = self.get_response(request)
         return response

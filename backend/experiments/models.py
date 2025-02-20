@@ -1,6 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
 import uuid
+
+from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
@@ -44,6 +46,17 @@ class AdminUser(AbstractUser):
 
     objects = UserManager()
 
+    groups = models.ManyToManyField(
+        Group,
+        related_name="adminuser_set",
+        blank=True
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name="adminuser_set",
+        blank=True
+    )
+
     def __str__(self):
         return self.email
 
@@ -55,6 +68,7 @@ class Project(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     api_key = models.CharField(max_length=255, unique=True)
     title = models.CharField(max_length=255)
+    description = models.TextField(max_length=255, blank=True, null=True)
     owner = models.ForeignKey(AdminUser, on_delete=models.CASCADE, related_name='owned_projects')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

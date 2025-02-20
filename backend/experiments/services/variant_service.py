@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import hashlib
 from django.db import transaction
 from django.db.models import Q
@@ -53,32 +53,65 @@ def assign_variant(user: ProjectUser, experiment: Experiment) -> Variant:
     return variants[-1]
 
 
+def merge_users(users: List[ProjectUser]) -> ProjectUser:
+    """Merge multiple users into one, preserving all relevant data."""
+    if not users:
+        raise ValueError("No users to merge")
+
+    primary_user = users[0]  # Use the first user as the primary one
+
+    for user in users[1:]:
+        # Merge identifiers if missing in primary
+        if not primary_user.device_id and user.device_id:
+            primary_user.device_id = user.device_id
+        if not primary_user.email and user.email:
+            primary_user.email = user.email
+        if not primary_user.external_id and user.external_id:
+            primary_user.external_id = user.external_id
+
+        # Merge optional fields
+        for field in ['latest_current_url', 'latest_os', 'latest_os_version', 'latest_device_type']:
+            if getattr(user, field, None) and not getattr(primary_user, field, None):
+                setattr(primary_user, field, getattr(user, field))
+
+        # Merge properties
+        primary_user.properties = {**user.properties, **primary_user.properties}
+
+        # Delete merged user
+        user.delete()
+
+    primary_user.save()
+    return primary_user
+
+
 def get_or_create_user(project: Project, identifier_data: Dict[str, Any]) -> ProjectUser:
     """
     Get or create a user based on the provided identifiers.
 
     Args:
-        project: The project the user belongs to
-        identifier_data: Dictionary containing user identifiers (device_id, email, external_id)
+        project: The project the user belongs to.
+        identifier_data: Dictionary containing user identifiers (device_id, email, external_id).
 
     Returns:
-        ProjectUser: The retrieved or created user
+        ProjectUser: The retrieved or created user.
 
     Raises:
-        ValueError: If no valid identifier is provided or if multiple users match different identifiers
+        ValueError: If no valid identifier is provided or if multiple users match different identifiers.
     """
+    user_id = identifier_data.get("id")
     device_id = identifier_data.get('device_id')
     email = identifier_data.get('email')
     external_id = identifier_data.get('external_id')
 
     # Ensure at least one identifier is provided
-    if not any([device_id, email, external_id]):
+    if not any([user_id, device_id, email, external_id]):
         raise ValueError("At least one identifier (device_id, email, or external_id) must be provided")
 
-    # Build query to find existing user by any provided identifier
+    # Build query to find existing users
     query = Q(project=project)
     conditions = []
-
+    if user_id:
+        conditions.append(Q(id=user_id))
     if device_id:
         conditions.append(Q(device_id=device_id))
     if email:
@@ -91,8 +124,10 @@ def get_or_create_user(project: Project, identifier_data: Dict[str, Any]) -> Pro
     for condition in conditions[1:]:
         query |= condition
 
-    # Try to find matching users
+    # Fetch matching users
     matching_users = list(ProjectUser.objects.filter(query))
+
+    optional_fields = ['latest_current_url', 'latest_os', 'latest_os_version', 'latest_device_type']
 
     if not matching_users:
         # No matching user found, create a new one
@@ -100,27 +135,25 @@ def get_or_create_user(project: Project, identifier_data: Dict[str, Any]) -> Pro
             'project': project,
             'device_id': device_id,
             'email': email,
-            'external_id': external_id
+            'external_id': external_id,
         }
 
         # Add optional fields if provided
-        for field in ['latest_current_url', 'latest_os', 'latest_os_version', 'latest_device_type']:
+        for field in optional_fields:
             if field in identifier_data:
-                user_data[field] = identifier_data.get(field)
+                user_data[field] = identifier_data[field]
 
-        # Add properties if provided
-        if 'properties' in identifier_data:
-            user_data['properties'] = identifier_data.get('properties')
+        # Merge properties if provided
+        user_data['properties'] = identifier_data.get('properties', {})
 
-        # Create and return the new user
         return ProjectUser.objects.create(**user_data)
 
     elif len(matching_users) == 1:
-        # Exactly one matching user found
+        # Exactly one user found, update fields if necessary
         user = matching_users[0]
-
-        # Update user with any new identifiers
         updated = False
+
+        # Update missing identifiers
         if device_id and not user.device_id:
             user.device_id = device_id
             updated = True
@@ -132,34 +165,22 @@ def get_or_create_user(project: Project, identifier_data: Dict[str, Any]) -> Pro
             updated = True
 
         # Update optional fields if provided
-        for field, attr in [
-            ('latest_current_url', 'latest_current_url'),
-            ('latest_os', 'latest_os'),
-            ('latest_os_version', 'latest_os_version'),
-            ('latest_device_type', 'latest_device_type')
-        ]:
+        for field in optional_fields:
             if field in identifier_data:
-                setattr(user, attr, identifier_data.get(field))
+                setattr(user, field, identifier_data[field])
                 updated = True
 
-        # Update properties if provided
+        # Merge properties
         if 'properties' in identifier_data:
-            # Merge existing properties with new ones
-            merged_properties = {**user.properties, **identifier_data.get('properties', {})}
-            user.properties = merged_properties
+            user.properties = {**user.properties, **identifier_data.get('properties', {})}
             updated = True
 
-        # Save if any changes were made
         if updated:
             user.save()
 
         return user
-
     else:
-        # Multiple users found with different identifiers, this should be handled
-        # For now, we'll just return the first matching user
-        # In production, you might want to merge these users or handle it differently
-        return matching_users[0]
+        return merge_users(matching_users)
 
 
 def get_or_create_distribution(user: ProjectUser, experiment: Experiment) -> Distribution:

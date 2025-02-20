@@ -6,7 +6,7 @@ from django.http import Http404
 
 from .authentication import APIKeyAuthentication
 from .models import Experiment, ProjectUser
-from .serializers import UserIdentifierSerializer, ExperimentVariantResponseSerializer
+from .serializers import UserIdentifierSerializer, ExperimentVariantResponseSerializer, UserResponseSerializer
 from .services.variant_service import (
     get_or_create_user,
     get_or_create_distribution,
@@ -85,6 +85,40 @@ class ExperimentVariantAPIView(LibraryAPIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class UserIdentifyAPIView(LibraryAPIView):
+    """
+    API endpoint to identify a user based on provided identifiers.
+    Returns user information if the user exists, or creates a new user if not.
+    """
+
+    def post(self, request):
+        """
+        Identify a user based on provided identifiers.
+        At least one of device_id, email, or external_id must be provided.
+        """
+        # Get the project from the request
+        project = self.get_project()
+
+        # Validate user identification data
+        user_serializer = UserIdentifierSerializer(data=request.data)
+        if not user_serializer.is_valid():
+            return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get validated user data
+        user_data = user_serializer.validated_data
+
+        try:
+            # Get or create user
+            user = get_or_create_user(project, user_data)
+
+            # Return user data
+            response_serializer = UserResponseSerializer(user)
+            return Response(response_serializer.data)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class UserExperimentsAPIView(LibraryAPIView):
     """
     API endpoint to get all experiments and variants for a user.
@@ -132,13 +166,10 @@ class UserExperimentsAPIView(LibraryAPIView):
                     }
                 })
 
+            user_serialized_data = UserResponseSerializer(user).data
+
             return Response({
-                'user': {
-                    'id': str(user.id),
-                    'device_id': user.device_id,
-                    'email': user.email,
-                    'external_id': user.external_id
-                },
+                'user': user_serialized_data,
                 'experiments': experiments_data
             })
 

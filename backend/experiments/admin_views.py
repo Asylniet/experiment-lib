@@ -1,5 +1,8 @@
+import secrets
+
+from django.db.models import Sum
 from rest_framework import viewsets, status
-from rest_framework.views import APIView
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -40,6 +43,9 @@ class AdminViewSetMixin:
         if hasattr(self.get_serializer().Meta.model, 'project'):
             return queryset.filter(project__owner=self.request.user)
 
+        if hasattr(self.get_serializer().Meta.model, 'experiment'):
+            return queryset.filter(experiment__project__owner=self.request.user)
+
         # Otherwise, return an empty queryset for safety
         return self.get_serializer().Meta.model.objects.none()
 
@@ -54,6 +60,14 @@ class AdminProjectViewSet(AdminViewSetMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Set the owner to the current user
         serializer.save(owner=self.request.user)
+
+    @action(detail=True, methods=['post'])
+    def regenerate_api_key(self, request, pk=None):
+        """Regenerate the API key for a specific project."""
+        project = self.get_object()
+        project.api_key = secrets.token_hex(16)
+        project.save(update_fields=['api_key'])
+        return Response({'api_key': project.api_key}, status=status.HTTP_200_OK)
 
 
 class AdminExperimentViewSet(AdminViewSetMixin, viewsets.ModelViewSet):
@@ -130,6 +144,37 @@ class AdminVariantViewSet(AdminViewSetMixin, viewsets.ModelViewSet):
             queryset = queryset.filter(experiment_id=experiment_id)
 
         return queryset
+
+    @staticmethod
+    def validate_rollout(experiment, instance, new_rollout):
+        """
+        Ensure the total rollout for an experiment does not exceed 1.
+        """
+        total_rollout = (
+            Variant.objects.filter(experiment=experiment)
+            .exclude(id=instance.id if instance else None)
+            .aggregate(total=Sum("rollout"))["total"] or 0
+        )
+
+        if total_rollout + new_rollout > 1.0:
+            raise ValidationError(
+                f"Total rollout for experiment {experiment.name} cannot exceed 1.0."
+            )
+
+    def perform_create(self, serializer):
+        experiment = serializer.validated_data["experiment"]
+        rollout = serializer.validated_data["rollout"]
+
+        self.validate_rollout(experiment, None, rollout)
+        serializer.save()
+
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        experiment = instance.experiment
+        new_rollout = serializer.validated_data.get("rollout", instance.rollout)
+
+        self.validate_rollout(experiment, instance, new_rollout)
+        serializer.save()
 
 
 class AdminProjectUserViewSet(AdminViewSetMixin, viewsets.ReadOnlyModelViewSet):

@@ -1,3 +1,5 @@
+import secrets
+
 from rest_framework import serializers
 from .models import Project, Experiment, Variant, ProjectUser, Distribution, AdminUser
 
@@ -38,6 +40,9 @@ class ExperimentSerializer(serializers.ModelSerializer):
             'project', 'variants', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+        extra_kwargs = {
+            'type': {'read_only': True}
+        }
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -46,8 +51,13 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'title', 'api_key', 'owner', 'experiments', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'description', 'api_key', 'owner', 'experiments', 'created_at', 'updated_at']
         read_only_fields = ['id', 'api_key', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        """Create a new project and assign API key."""
+        validated_data['api_key'] = secrets.token_hex(16)
+        return super().create(validated_data)
 
 
 class DistributionSerializer(serializers.ModelSerializer):
@@ -77,11 +87,11 @@ class ExperimentVariantResponseSerializer(serializers.Serializer):
         }
 
 
-class UserIdentifierSerializer(serializers.Serializer):
+class UserResponseSerializer(serializers.Serializer):
     """
-    Serializer for user identification.
-    At least one of device_id, email, or external_id must be provided.
+    Serializer for user response after identification.
     """
+    id = serializers.CharField(required=False, allow_blank=False, allow_null=True)
     device_id = serializers.CharField(required=False, allow_blank=False, allow_null=True)
     email = serializers.EmailField(required=False, allow_blank=False, allow_null=True)
     external_id = serializers.CharField(required=False, allow_blank=False, allow_null=True)
@@ -93,11 +103,18 @@ class UserIdentifierSerializer(serializers.Serializer):
     # Additional properties as a dictionary
     properties = serializers.DictField(required=False, allow_null=True)
 
+
+class UserIdentifierSerializer(UserResponseSerializer, serializers.Serializer):
+    """
+    Serializer for user identification.
+    At least one of device_id, email, or external_id must be provided.
+    """
     def validate(self, data):
         """
         Check that at least one identifier is provided.
         """
         if not any([
+            data.get('id'),
             data.get('device_id'),
             data.get('email'),
             data.get('external_id')
