@@ -14,7 +14,7 @@ export class HttpClient {
 	private pendingRequests: Map<string, PendingRequest>;
 	private retryConfig: RetryConfig;
 	private isDisposed = false;
-	private DEFAULT_TIMEOUT = 10000;
+	private DEFAULT_TIMEOUT_MS = 10000;
 	
 	constructor(config: HttpClientConfig) {
 		httpClientConfigSchema.parse(config);
@@ -35,7 +35,7 @@ export class HttpClient {
 		
 		this.axiosInstance = axios.create({
 			baseURL: config.baseURL,
-			timeout: config.timeout || this.DEFAULT_TIMEOUT,
+			timeout: config.timeout || this.DEFAULT_TIMEOUT_MS,
 			headers: {
 				'Content-Type': 'application/json',
 			},

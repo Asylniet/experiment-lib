@@ -1,5 +1,6 @@
-import { User } from "src/types";
+import { Experiment, User, Variant } from "src/types";
 import { STORAGE_KEY_PREFIX } from "@/lib/constants";
+import { storedVariantsSchema } from "@/schemas";
 
 
 export class StorageManager {
@@ -19,19 +20,32 @@ export class StorageManager {
 		return userData ? JSON.parse(userData) : null;
 	}
 	
-	public setVariant(experimentName: string, variant: string): void {
-		const variants = this.getVariants();
-		variants[experimentName] = variant;
+	public setVariant(experimentKey: Experiment['key'], variant: Variant) {
+		let variants = this.getVariants();
+		if(!variants) variants = {};
+		variants[experimentKey] = variant;
+		
 		this.storage.setItem(`${this.prefix}variants`, JSON.stringify(variants));
 	}
 	
-	public getVariant(experimentName: string): string | null {
+	public getVariant(experimentKey: Experiment['key']) {
 		const variants = this.getVariants();
-		return variants[experimentName] || null;
+		if(!variants) return null;
+		
+		return variants[experimentKey];
 	}
 	
-	private getVariants(): Record<string, string> {
+	private getVariants() {
 		const variantsData = this.storage.getItem(`${this.prefix}variants`);
-		return variantsData ? JSON.parse(variantsData) : {};
+		if(!variantsData) return null;
+		
+		const parsedVariants = storedVariantsSchema.safeParse(JSON.parse(variantsData));
+		
+		if(!parsedVariants.success) {
+			console.error("Error parsing variants", parsedVariants.error);
+			return null;
+		}
+		
+		return parsedVariants.data;
 	}
 }

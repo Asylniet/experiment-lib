@@ -9,10 +9,12 @@ export const experimentProviderConfigSchema: z.ZodType<ExperimentProviderConfig>
 });
 
 export const variantSchema: z.ZodType<Variant> = z.object({
-	name: z.string(),
-	weight: z.number(),
-	config: z.record(z.string(), z.any()).optional(),
+	id: z.string(),
+	key: z.string(),
+	payload: z.any().optional(),
 });
+
+export const storedVariantsSchema = z.record(z.string(), variantSchema);
 
 export const experimentConfigSchema: z.ZodType<ExperimentConfig> = z.object({
 	name: z.string(),

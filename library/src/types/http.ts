@@ -14,7 +14,6 @@ export type InterceptorHeader = {
 
 export interface HttpClientConfig {
 	baseURL: string;
-	apiKey: string;
 	headers: InterceptorHeader[];
 	timeout?: number;
 	retry?: Partial<RetryConfig>;

@@ -1,13 +1,13 @@
-import { HttpClient } from "@/core/http-client";
 import { StorageManager } from "@/core/storage-manager";
 import { Experiment, User } from "@/types";
+import { ApiClient } from "@/core/api-client";
 
 export class ExperimentClient {
-	private httpClient: HttpClient;
+	private apiClient: ApiClient;
 	private storageManager: StorageManager;
 	
-	constructor(httpClient: HttpClient, storageManager: StorageManager) {
-		this.httpClient = httpClient;
+	constructor(apiClient: ApiClient, storageManager: StorageManager) {
+		this.apiClient = apiClient;
 		this.storageManager = storageManager;
 	}
 	
@@ -18,47 +18,20 @@ export class ExperimentClient {
 			return storedUser;
 		}
 		
-		const user: User = {
-			id: userData.id || this.generateUserId(),
-			email: userData.email || "",
-		};
-		
-		await this.httpClient.request({
-			method: "POST",
-			url: "/api/users",
-			data: user,
-		});
-		
-		this.storageManager.setUser(user);
-		
-		return user;
-	}
-	
-	public async updateUser(userData: Partial<User>): Promise<User> {
-		const user = this.storageManager.getUser();
-		
-		if (!user) {
-			throw new Error("User not initialized");
-		}
-		
-		const updatedUser: User = {
-			...user,
+		const user: Partial<User> = {
+			device_id: userData.device_id || this.generateDeviceId(),
 			...userData,
 		};
 		
-		await this.httpClient.request({
-			method: "PUT",
-			url: `/api/users/${user.id}`,
-			data: updatedUser,
-		});
+		const initializedUser = await this.apiClient.identifyUser(user);
 		
-		this.storageManager.setUser(updatedUser);
+		this.storageManager.setUser(initializedUser);
 		
-		return updatedUser;
+		return initializedUser;
 	}
 	
-	public async getVariant(experimentName: string): Promise<string> {
-		const storedVariant = this.storageManager.getVariant(experimentName);
+	public async getVariant(experimentKey: Experiment['key']) {
+		const storedVariant = this.storageManager.getVariant(experimentKey);
 		
 		if (storedVariant) {
 			return storedVariant;
@@ -70,20 +43,15 @@ export class ExperimentClient {
 			throw new Error("User not initialized");
 		}
 		
-		const experiment = await this.httpClient.request<Experiment>({
-			method: "GET",
-			url: `/api/experiments/${experimentName}`,
-			params: { userId: user.id },
-		});
+		const experiment = await this.apiClient.getVariant({experimentKey, user});
 		
-		this.storageManager.setVariant(experimentName, experiment.variant);
+		this.storageManager.setVariant(experimentKey, experiment.variant);
 		
 		return experiment.variant;
 	}
 	
-	private generateUserId(): string {
-		// TODO: Implement a more robust user ID generation
-		return Math.random().toString(36).substring(7);
+	private generateDeviceId(): string {
+		return crypto.randomUUID();
 	}
 	
 	public subscribeToUpdates(callback: (experiment: Experiment) => void): void {

@@ -1,14 +1,15 @@
+import { HttpClientConfig } from "@/types/http";
+
 export interface ExperimentProviderConfig {
-	host: string;
+	host: HttpClientConfig['baseURL'];
 	apiKey: string;
-	defaultVariant?: "control" | string;
 	storage?: Storage;
 }
 
 export interface Variant {
-	name: string;
-	weight: number;
-	config?: Record<string, unknown>;
+	id: string;
+	key: string;
+	payload?: object;
 }
 
 export interface ExperimentConfig {
@@ -19,14 +20,30 @@ export interface ExperimentConfig {
 
 export interface User {
 	id: string;
-	email: string;
-	meta?: Record<string, unknown>;
+	device_id?: string;
+	email?: string;
+	external_id?: string;
+	first_seen?: string;
+	last_seen?: string;
+	latest_current_url?: string;
+	latest_os?: string;
+	latest_os_version?: string;
+	latest_device_type?: string;
+	properties?: Record<string, unknown>;
 }
 
 export interface Experiment {
-	variant: string;
+	id: string;
+	key: string;
+	name: string;
 }
 
-export interface ABTestingInstance {
-	getVariant: (experimentName: string) => string;
+export interface VariantResp {
+	experiment: Experiment;
+	variant: Variant;
+}
+
+export interface ExperimentsResp {
+	user: User;
+	experiments: VariantResp[];
 }
