@@ -19,6 +19,7 @@ export const ExperimentProvider: React.FC<ExperimentProviderProps> = ({
   apiKey,
   host,
   storage = localStorage,
+  config,
 }) => {
   const apiClient = new ApiClient(
     new HttpClient({
@@ -32,9 +33,13 @@ export const ExperimentProvider: React.FC<ExperimentProviderProps> = ({
     }),
   );
 
-  const client = new ExperimentClient(apiClient, new StorageManager(storage));
+  const client = new ExperimentClient(
+    apiClient,
+    new StorageManager(storage),
+    config,
+  );
 
-  client.initializeUser({});
+  client.initializeUser();
 
   const memoizedClient = React.useMemo(() => client, [client]);
 

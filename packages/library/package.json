@@ -17,6 +17,7 @@
     "dist"
   ],
   "scripts": {
+    "dev": "rollup -c -w",
     "build": "rollup -c",
     "test": "jest",
     "lint": "eslint src --ext .ts,.tsx"

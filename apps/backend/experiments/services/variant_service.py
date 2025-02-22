@@ -28,9 +28,12 @@ def assign_variant(user: ProjectUser, experiment: Experiment) -> Variant:
 
     # Calculate total rollout percentage
     total_rollout = sum(variant.rollout for variant in variants)
-    if total_rollout <= 0:
-        # If no positive rollout, return the first variant
-        return variants[0]
+    print(f"Total Rollout: {total_rollout}")
+
+    nonzero_variants = [variant for variant in variants if variant.rollout > 0]
+    if len(nonzero_variants) == 1:
+        print(f"Only one active variant: {nonzero_variants[0].id}")
+        return nonzero_variants[0]
 
     # Normalize rollout percentages if they don't sum to 1
     normalized_variants = []
@@ -43,10 +46,13 @@ def assign_variant(user: ProjectUser, experiment: Experiment) -> Variant:
 
     # Get a deterministic value between 0 and 1 for this user-experiment pair
     hash_value = get_hash_number(str(user.id), str(experiment.id))
+    print(f"Hash value for user {user.id}: {hash_value}")
 
     # Find which variant's range contains this hash value
     for variant, range_start, range_end in normalized_variants:
+        print(f"Checking variant {variant.id}: range ({range_start}, {range_end})")
         if range_start <= hash_value < range_end:
+            print(f"User assigned to Variant {variant.id}")
             return variant
 
     # Fallback to the last variant if something goes wrong
@@ -207,7 +213,7 @@ def recalculate_experiment_distributions(experiment: Experiment) -> int:
 
     with transaction.atomic():
         # Get all distributions for this experiment
-        distributions = Distribution.objects.filter(experiment=experiment).select_related('user', 'variant')
+        distributions = Distribution.objects.filter(experiment=experiment)
 
         # For each distribution, calculate what the variant should be now
         for distribution in distributions:
