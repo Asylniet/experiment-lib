@@ -6,14 +6,18 @@
     "jsx": "react",
     "declaration": true,
     "declarationDir": "dist",
+    "emitDeclarationOnly": true,
+    "rootDir": "src",
+    "outDir": "dist",
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
+    "importHelpers": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["src/*"]
     }
   },
   "include": ["src"],

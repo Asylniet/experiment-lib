@@ -55,7 +55,7 @@ export class HttpClient {
 	}
 	
 	private setupInterceptors(headers: InterceptorHeader[]): void {
-		interceptorHeaderSchema.parse(headers);
+		interceptorHeaderSchema.array().parse(headers);
 		
 		this.axiosInstance.interceptors.request.use(
 			(config) => {
