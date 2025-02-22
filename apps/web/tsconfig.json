@@ -8,17 +8,23 @@
     "types": ["vite/client"],
 
     /* Bundler mode */
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
 
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@library/*": ["../library/src/*"]
+    },
     /* Linting */
     "skipLibCheck": true,
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": false,
+    "allowSyntheticDefaultImports": false
   }
 }
