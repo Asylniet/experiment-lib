@@ -6,7 +6,7 @@ export const Route = createFileRoute("/")({
 });
 
 function RouteComponent() {
-  const { data, isLoading, error } = useGetVariant("first_experiment");
+  const { variant, isLoading, error } = useGetVariant("first_experiment");
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -16,5 +16,5 @@ function RouteComponent() {
     return <div>Error: {error?.message}</div>;
   }
 
-  return data?.key;
+  return variant?.key;
 }

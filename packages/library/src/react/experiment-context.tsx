@@ -19,25 +19,14 @@ export const ExperimentProvider: React.FC<ExperimentProviderProps> = ({
   apiKey,
   host,
   storage = localStorage,
-  config,
+  configs,
 }) => {
-  const apiClient = new ApiClient(
-    new HttpClient({
-      baseURL: host,
-      headers: [
-        {
-          key: "X-API-KEY",
-          value: apiKey,
-        },
-      ],
-    }),
-  );
-
-  const client = new ExperimentClient(
-    apiClient,
-    new StorageManager(storage),
-    config,
-  );
+  const client = new ExperimentClient({
+    host,
+    apiKey,
+    storageManager: new StorageManager(storage),
+    configs,
+  });
 
   client.initializeUser();
 

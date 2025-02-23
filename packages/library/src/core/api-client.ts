@@ -1,11 +1,12 @@
 import { HttpClient } from "@/core/http-client";
 import { Experiment, ExperimentsResp, User, VariantResp } from "@/types";
+import { HttpClientConfig } from "@/types/http";
 
 export class ApiClient {
   private httpClient: HttpClient;
 
-  constructor(httpClient: HttpClient) {
-    this.httpClient = httpClient;
+  constructor(httpClientConfig: HttpClientConfig) {
+    this.httpClient = new HttpClient(httpClientConfig);
   }
 
   public async identifyUser(user: Omit<User, "id">) {

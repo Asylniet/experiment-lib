@@ -7,6 +7,7 @@ export const Route = createRootRoute({
     <ExperimentProvider
       apiKey="0b4aa9f1be74a3583643cad1ba72df8a"
       host="http://localhost:8000"
+      configs={{ backgroundFetch: false }}
     >
       <hr />
       <Outlet />

@@ -215,6 +215,9 @@ class ExperimentConsumer(AsyncJsonWebsocketConsumer):
 
         distribution = await self.get_distribution(self.user, experiment)
 
+        # Fetch variant data in a sync-to-async wrapper
+        variant = await database_sync_to_async(lambda: distribution.variant)()
+
         # Format the response
         experiment_data = {
             'id': str(experiment.id),
@@ -223,9 +226,9 @@ class ExperimentConsumer(AsyncJsonWebsocketConsumer):
         }
 
         variant_data = {
-            'id': str(distribution.variant.id),
-            'key': distribution.variant.key,
-            'payload': distribution.variant.payload
+            'id': str(variant.id),
+            'key': variant.key,
+            'payload': variant.payload
         }
 
         await self.send_json({

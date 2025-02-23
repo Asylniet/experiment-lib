@@ -4,11 +4,25 @@ export interface ExperimentClientConfig {
   backgroundFetch?: boolean;
 }
 
+export interface WebSocketConfig {
+  reconnect?: boolean;
+  maxReconnectDelay?: number;
+  debug?: boolean;
+  host: string;
+  apiKey: string;
+}
+
+export interface ExperimentUpdateEvent {
+  type: "experiment_updated" | "distribution_updated" | "experiment_state";
+  experiment: Experiment;
+  variant: Variant;
+}
+
 export interface ExperimentProviderConfig {
   host: HttpClientConfig["baseURL"];
   apiKey: string;
   storage?: Storage;
-  config?: ExperimentClientConfig;
+  configs?: ExperimentClientConfig;
 }
 
 export interface Variant {
