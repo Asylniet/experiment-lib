@@ -1,8 +1,10 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.db import transaction
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
-from .models import Variant
+from .models import Variant, Distribution
 from .services.variant_service import recalculate_experiment_distributions
 
 
@@ -42,3 +44,85 @@ def handle_variant_change(variant, created):
         # Recalculate distributions
         changed_count = recalculate_experiment_distributions(experiment)
         print(f"Updated {changed_count} distributions for experiment {experiment.key}.")
+
+
+@receiver(post_save, sender=Variant)
+def variant_saved_websocket(sender, instance, created, **kwargs):
+    """
+    When a variant is updated, send notification via WebSocket.
+    """
+    experiment = instance.experiment
+
+    # Only send notifications if the experiment is running
+    if experiment.status == "running":
+        channel_layer = get_channel_layer()
+
+        # Format the variant data
+        variant_data = {
+            'id': str(instance.id),
+            'key': instance.key,
+            'payload': instance.payload
+        }
+
+        # Format the experiment data
+        experiment_data = {
+            'id': str(experiment.id),
+            'key': experiment.key,
+            'name': experiment.name
+        }
+
+        # Send notification to the experiment's channel group
+        async_to_sync(channel_layer.group_send)(
+            f"experiment_{str(experiment.id)}",
+            {
+                'type': 'experiment_update',
+                'experiment': experiment_data,
+                'variant': variant_data
+            }
+        )
+
+        # Also send notification to the project channel group
+        async_to_sync(channel_layer.group_send)(
+            f"project_{str(experiment.project.id)}",
+            {
+                'type': 'experiment_update',
+                'experiment': experiment_data,
+                'variant': variant_data
+            }
+        )
+
+
+@receiver(post_save, sender=Distribution)
+def distribution_saved_websocket(sender, instance, created, **kwargs):
+    """
+    When a distribution is updated, send notification to the specific user.
+    """
+    experiment = instance.experiment
+
+    # Only send notifications if the experiment is running
+    if experiment.status == "running":
+        channel_layer = get_channel_layer()
+
+        # Format the variant data
+        variant_data = {
+            'id': str(instance.variant.id),
+            'key': instance.variant.key,
+            'payload': instance.variant.payload
+        }
+
+        # Format the experiment data
+        experiment_data = {
+            'id': str(experiment.id),
+            'key': experiment.key,
+            'name': experiment.name
+        }
+
+        # Send notification to the user's channel group
+        async_to_sync(channel_layer.group_send)(
+            f"user_{str(instance.user.id)}",
+            {
+                'type': 'distribution_update',
+                'experiment': experiment_data,
+                'variant': variant_data
+            }
+        )
