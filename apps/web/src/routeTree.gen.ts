@@ -11,10 +11,17 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as VariantsImport } from './routes/variants'
 import { Route as FeatureFlagImport } from './routes/feature-flag'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
+
+const VariantsRoute = VariantsImport.update({
+  id: '/variants',
+  path: '/variants',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const FeatureFlagRoute = FeatureFlagImport.update({
   id: '/feature-flag',
@@ -46,6 +53,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FeatureFlagImport
       parentRoute: typeof rootRoute
     }
+    '/variants': {
+      id: '/variants'
+      path: '/variants'
+      fullPath: '/variants'
+      preLoaderRoute: typeof VariantsImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -54,36 +68,41 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/feature-flag': typeof FeatureFlagRoute
+  '/variants': typeof VariantsRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/feature-flag': typeof FeatureFlagRoute
+  '/variants': typeof VariantsRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/feature-flag': typeof FeatureFlagRoute
+  '/variants': typeof VariantsRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/feature-flag'
+  fullPaths: '/' | '/feature-flag' | '/variants'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/feature-flag'
-  id: '__root__' | '/' | '/feature-flag'
+  to: '/' | '/feature-flag' | '/variants'
+  id: '__root__' | '/' | '/feature-flag' | '/variants'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FeatureFlagRoute: typeof FeatureFlagRoute
+  VariantsRoute: typeof VariantsRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FeatureFlagRoute: FeatureFlagRoute,
+  VariantsRoute: VariantsRoute,
 }
 
 export const routeTree = rootRoute
@@ -97,7 +116,8 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/feature-flag"
+        "/feature-flag",
+        "/variants"
       ]
     },
     "/": {
@@ -105,6 +125,9 @@ export const routeTree = rootRoute
     },
     "/feature-flag": {
       "filePath": "feature-flag.tsx"
+    },
+    "/variants": {
+      "filePath": "variants.tsx"
     }
   }
 }

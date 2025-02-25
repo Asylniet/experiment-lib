@@ -4,13 +4,18 @@ import { useExparoVariantsContext } from "@/react/exparo-variants";
 
 type ExparoVariantRendererProps<T> = {
   children: React.ReactNode | ((payload: T | undefined) => React.ReactNode);
-  key: Variant["key"];
+  variantKey: Variant["key"];
 };
 
 export function ExparoVariantRenderer<T>(props: ExparoVariantRendererProps<T>) {
   const experiment = useExparoVariantsContext<T>();
   const variant = experiment.variant;
-  if (!variant || variant.key !== props.key) {
+
+  if (!variant) {
+    return "NOV";
+  }
+
+  if (variant.key !== props.variantKey) {
     return null;
   }
 
