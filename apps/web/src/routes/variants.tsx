@@ -9,7 +9,7 @@ function RouteComponent() {
   return (
     <ExparoVariants experimentKey="second_experiment" fallback="OH NOOO">
       <ExparoVariantRenderer variantKey="variant_1">
-        1 asdasdasdas
+        {(payload: string) => <div>Variant 1: {payload}</div>}
       </ExparoVariantRenderer>
       <ExparoVariantRenderer variantKey="variant_2">2</ExparoVariantRenderer>
     </ExparoVariants>

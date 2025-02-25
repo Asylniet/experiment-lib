@@ -3,7 +3,7 @@ import { Experiment, ExperimentClientConfig, User, Variant } from "@/types";
 import { ApiClient } from "@/core/api-client";
 import { UserNotInitializedError } from "@/lib/errors";
 import { WebSocketManager } from "@/core/websocket-client";
-import { HttpClientConfig } from "@/types/http";
+import { ExperimentCallback, HttpClientConfig } from "@/types/http";
 
 type ExperimentClientConstructorConfig = {
   host: HttpClientConfig["baseURL"];
@@ -18,10 +18,7 @@ export class ExperimentClient {
   public storageManager: StorageManager;
   public configs: ExperimentClientConfig;
   private webSocketManager: WebSocketManager | null = null;
-  private experimentCallbacks: Map<
-    string,
-    ((experiment: Experiment, variant: Variant) => void)[]
-  > = new Map();
+  private experimentCallbacks: Map<string, ExperimentCallback[]> = new Map();
 
   constructor({
     host,
@@ -109,7 +106,7 @@ export class ExperimentClient {
 
     callbacks.forEach((callback) => {
       try {
-        callback(experimentObj, experiment.variant);
+        callback(experimentObj, experiment.variant, "experiment_state");
       } catch (error) {
         console.error(
           `Error in experiment callback for ${experimentKey}:`,
@@ -136,7 +133,7 @@ export class ExperimentClient {
 
   public subscribeToExperiment(
     experimentKey: Experiment["key"],
-    callback: (experiment: Experiment, variant: Variant<any>) => void,
+    callback: ExperimentCallback,
   ) {
     if (!this.experimentCallbacks.has(experimentKey)) {
       this.experimentCallbacks.set(experimentKey, []);
@@ -157,7 +154,7 @@ export class ExperimentClient {
 
   public unsubscribeFromExperiment(
     experimentKey: Experiment["key"],
-    callback?: (experiment: Experiment, variant: Variant) => void,
+    callback?: ExperimentCallback,
   ): void {
     if (!callback) {
       // Remove all callbacks for this experiment

@@ -3,6 +3,7 @@ import { HookOptions, UseGetVariantReturnType } from "@/types/react";
 import { useExperimentClient } from "@/react/experiment-context";
 import { useQuery } from "@/react/useQuery";
 import React from "react";
+import { ExperimentCallback } from "@/types/http";
 
 export const useGetVariant = <T>(
   experimentKey: Experiment["key"],
@@ -47,12 +48,19 @@ export const useGetVariant = <T>(
   );
 
   React.useEffect(() => {
-    const handleVariantUpdate = (
-      experimentData: Experiment,
-      variantData: Variant<T>,
+    const handleVariantUpdate: ExperimentCallback = (
+      experimentData,
+      variantData,
+      type,
     ) => {
       setExperiment(experimentData);
-      updateVariant(variantData);
+      if (type === "experiment_updated") {
+        if (variant?.key === variantData.key) {
+          updateVariant(variantData as Variant<T>);
+        }
+        return;
+      }
+      updateVariant(variantData as Variant<T>);
     };
 
     const unsubscribe = experimentClient.subscribeToExperiment(

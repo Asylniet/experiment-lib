@@ -1,13 +1,11 @@
 import { Experiment, User, Variant, WebSocketConfig } from "@/types";
+import { ExperimentCallback } from "@/types/http";
 
 export class WebSocketManager {
   private socket: WebSocket | null = null;
   private reconnectTimeout: number | null = null;
   private config: WebSocketConfig;
-  private experimentCallbacks: Map<
-    string,
-    ((experiment: Experiment, variant: Variant) => void)[]
-  > = new Map();
+  private experimentCallbacks: Map<string, ExperimentCallback[]> = new Map();
   private connectionStateCallbacks: ((connected: boolean) => void)[] = [];
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
@@ -106,7 +104,7 @@ export class WebSocketManager {
 
   public subscribeToExperiment(
     experimentKey: string,
-    callback: (experiment: Experiment, variant: Variant) => void,
+    callback: ExperimentCallback,
   ): void {
     // Register the callback
     if (!this.experimentCallbacks.has(experimentKey)) {
@@ -131,7 +129,7 @@ export class WebSocketManager {
    */
   public unsubscribeFromExperiment(
     experimentKey: string,
-    callback?: (experiment: Experiment, variant: Variant) => void,
+    callback?: ExperimentCallback,
   ): void {
     if (!callback) {
       // Remove all callbacks for this experiment
@@ -222,7 +220,8 @@ export class WebSocketManager {
 
       if (
         data.type === "distribution_updated" ||
-        data.type === "experiment_state"
+        data.type === "experiment_state" ||
+        data.type === "experiment_updated"
       ) {
         const experimentKey = data.experiment.key;
         const experiment: Experiment = {
@@ -243,7 +242,7 @@ export class WebSocketManager {
         const callbacks = this.experimentCallbacks.get(experimentKey) || [];
         callbacks.forEach((callback) => {
           try {
-            callback(experiment, variant);
+            callback(experiment, variant, data.type);
           } catch (error) {
             this.log("Error in experiment callback:", error);
           }

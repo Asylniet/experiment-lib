@@ -1,4 +1,5 @@
 import { AxiosRequestConfig } from "axios";
+import { Experiment, Variant } from "@/types/index";
 
 export interface RetryConfig {
   attempts: number;
@@ -22,4 +23,12 @@ export interface HttpClientConfig {
 export interface RequestOptions
   extends Omit<AxiosRequestConfig, "baseURL" | "cancelToken"> {
   skipRetry?: boolean;
+}
+
+export interface ExperimentCallback {
+  (
+    experiment: Experiment,
+    variant: Variant,
+    type: "experiment_updated" | "distribution_updated" | "experiment_state",
+  ): void;
 }

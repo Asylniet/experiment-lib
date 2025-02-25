@@ -89,15 +89,15 @@ def variant_saved_websocket(sender, instance, created, **kwargs):
             }
         )
 
-        # Also send notification to the project channel group
-        async_to_sync(channel_layer.group_send)(
-            f"project_{str(experiment.project.id)}",
-            {
-                'type': 'experiment_update',
-                'experiment': experiment_data,
-                'variant': variant_data
-            }
-        )
+        # # Also send notification to the project channel group
+        # async_to_sync(channel_layer.group_send)(
+        #     f"project_{str(experiment.project.id)}",
+        #     {
+        #         'type': 'experiment_update',
+        #         'experiment': experiment_data,
+        #         'variant': variant_data
+        #     }
+        # )
 
 
 @receiver(post_save, sender=Distribution)
