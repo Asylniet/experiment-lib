@@ -31,6 +31,12 @@ urlpatterns = [
     path('admin/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('admin/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
+    path(
+        'admin/experiments/<pk>/variants/',
+        AdminExperimentViewSet.as_view({'patch': 'bulk_update_variants'}),
+        name='admin-experiment-bulk-update-variants'
+    ),
+
     # Library API endpoints (API key protected)
     path(
         'experiments/<str:experiment_key>/variant',

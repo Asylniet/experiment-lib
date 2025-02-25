@@ -229,6 +229,8 @@ export class WebSocketManager {
           id: data.experiment.id,
           key: experimentKey,
           name: data.experiment.name,
+          type: data.experiment.type,
+          status: data.experiment.status,
         };
 
         const variant: Variant = {

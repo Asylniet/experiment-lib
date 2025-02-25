@@ -7,10 +7,10 @@ export interface RetryConfig {
   shouldRetry: (error: unknown) => boolean;
 }
 
-export type InterceptorHeader = {
+export interface InterceptorHeader {
   key: string;
   value: string;
-};
+}
 
 export interface HttpClientConfig {
   baseURL: string;

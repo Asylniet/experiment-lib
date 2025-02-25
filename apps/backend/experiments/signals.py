@@ -15,7 +15,8 @@ def variant_saved(sender, instance, created, **kwargs):
     for the associated experiment.
     """
     # Use transaction.on_commit to ensure this runs after the current transaction completes
-    transaction.on_commit(lambda: handle_variant_change(instance, created))
+    if instance.experiment_id:  # Check if it exists before deletion
+        transaction.on_commit(lambda: handle_variant_change(instance, created))
 
 
 @receiver(post_delete, sender=Variant)
@@ -25,7 +26,9 @@ def variant_deleted(sender, instance, **kwargs):
     for the associated experiment.
     """
     # Use transaction.on_commit to ensure this runs after the current transaction completes
-    transaction.on_commit(lambda: handle_variant_change(instance, False))
+    if instance.experiment_id:  # Check if it exists before deletion
+        experiment_id = instance.experiment_id  # Store the ID before deleting
+        transaction.on_commit(lambda: handle_variant_change(experiment_id, False))
 
 
 def handle_variant_change(variant, created):
@@ -33,7 +36,10 @@ def handle_variant_change(variant, created):
     Handle variant changes by recalculating distributions if needed.
     """
     # Get the experiment associated with this variant
-    experiment = variant.experiment
+    experiment = getattr(variant, 'experiment', None)
+
+    if not experiment:
+        return
 
     # Only recalculate if the experiment is running
     if experiment.status == "running":
@@ -68,7 +74,9 @@ def variant_saved_websocket(sender, instance, created, **kwargs):
         experiment_data = {
             'id': str(experiment.id),
             'key': experiment.key,
-            'name': experiment.name
+            'name': experiment.name,
+            'status': experiment.status,
+            'type': experiment.type,
         }
 
         # Send notification to the experiment's channel group
@@ -114,7 +122,9 @@ def distribution_saved_websocket(sender, instance, created, **kwargs):
         experiment_data = {
             'id': str(experiment.id),
             'key': experiment.key,
-            'name': experiment.name
+            'name': experiment.name,
+            'status': experiment.status,
+            'type': experiment.type,
         }
 
         # Send notification to the user's channel group

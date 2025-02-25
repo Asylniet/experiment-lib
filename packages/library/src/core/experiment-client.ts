@@ -31,7 +31,8 @@ export class ExperimentClient {
     webSocketManager,
   }: ExperimentClientConstructorConfig) {
     const DEFAULT_CONFIGS: ExperimentClientConfig = {
-      backgroundFetch: true,
+      backgroundUpdate: true,
+      webSocketPath: "/ws/experiments/",
     };
 
     this.apiClient = new ApiClient({
@@ -46,7 +47,7 @@ export class ExperimentClient {
     this.storageManager = storageManager;
     this.configs = { ...DEFAULT_CONFIGS, ...configs };
 
-    if (!this.configs.backgroundFetch) return;
+    if (!this.configs.backgroundUpdate) return;
 
     if (webSocketManager) {
       this.webSocketManager = webSocketManager;
@@ -54,7 +55,7 @@ export class ExperimentClient {
     }
 
     this.webSocketManager = new WebSocketManager({
-      host: host + "/ws/experiments/",
+      host: host + this.configs?.webSocketPath,
       apiKey,
     });
   }
@@ -86,7 +87,7 @@ export class ExperimentClient {
     return initializedUser;
   }
 
-  public async fetchVariant(experimentKey: Experiment["key"]) {
+  public async fetchVariant<T = unknown>(experimentKey: Experiment["key"]) {
     const user = this.storageManager.getUser();
 
     if (!user) {
@@ -102,6 +103,8 @@ export class ExperimentClient {
       id: experiment.experiment.id,
       key: experimentKey,
       name: experiment.experiment.name,
+      type: experiment.experiment.type,
+      status: experiment.experiment.status,
     };
 
     callbacks.forEach((callback) => {
@@ -115,7 +118,7 @@ export class ExperimentClient {
       }
     });
 
-    return experiment.variant;
+    return experiment.variant as Variant<T>;
   }
 
   private getDeviceId(): string {
@@ -133,7 +136,7 @@ export class ExperimentClient {
 
   public subscribeToExperiment(
     experimentKey: Experiment["key"],
-    callback: (experiment: Experiment, variant: Variant) => void,
+    callback: (experiment: Experiment, variant: Variant<any>) => void,
   ) {
     if (!this.experimentCallbacks.has(experimentKey)) {
       this.experimentCallbacks.set(experimentKey, []);

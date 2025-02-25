@@ -1,8 +1,6 @@
 import React from "react";
-import { ExperimentProviderConfig } from "@/types";
+import { ExperimentClientProviderConfig } from "@/types";
 import { ExperimentClient } from "@/core/experiment-client";
-import { ApiClient } from "@/core/api-client";
-import { HttpClient } from "@/core/http-client";
 import { StorageManager } from "@/core/storage-manager";
 
 type ExperimentContextType = ExperimentClient;
@@ -11,10 +9,10 @@ const ExperimentContext = React.createContext<
   ExperimentContextType | undefined
 >(undefined);
 
-type ExperimentProviderProps =
-  React.PropsWithChildren<ExperimentProviderConfig>;
+type ExperimentClientProviderProps =
+  React.PropsWithChildren<ExperimentClientProviderConfig>;
 
-export const ExperimentProvider: React.FC<ExperimentProviderProps> = ({
+const ExperimentClientProvider: React.FC<ExperimentClientProviderProps> = ({
   children,
   apiKey,
   host,
@@ -39,7 +37,7 @@ export const ExperimentProvider: React.FC<ExperimentProviderProps> = ({
   );
 };
 
-export const useExperimentClient = () => {
+const useExperimentClient = () => {
   const context = React.useContext(ExperimentContext);
   if (!context) {
     throw new Error(
@@ -48,3 +46,5 @@ export const useExperimentClient = () => {
   }
   return context;
 };
+
+export { ExperimentClientProvider, useExperimentClient };

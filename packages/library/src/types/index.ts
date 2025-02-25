@@ -1,7 +1,8 @@
 import { HttpClientConfig } from "@/types/http";
 
 export interface ExperimentClientConfig {
-  backgroundFetch?: boolean;
+  backgroundUpdate?: boolean;
+  webSocketPath?: string;
 }
 
 export interface WebSocketConfig {
@@ -15,26 +16,20 @@ export interface WebSocketConfig {
 export interface ExperimentUpdateEvent {
   type: "experiment_updated" | "distribution_updated" | "experiment_state";
   experiment: Experiment;
-  variant: Variant;
+  variant: Variant<any>;
 }
 
-export interface ExperimentProviderConfig {
+export interface ExperimentClientProviderConfig {
   host: HttpClientConfig["baseURL"];
   apiKey: string;
   storage?: Storage;
   configs?: ExperimentClientConfig;
 }
 
-export interface Variant {
+export interface Variant<T = unknown> {
   id: string;
   key: string;
-  payload?: object;
-}
-
-export interface ExperimentConfig {
-  name: string;
-  variants: Variant[];
-  isActive: boolean;
+  payload?: T;
 }
 
 export interface User {
@@ -55,6 +50,8 @@ export interface Experiment {
   id: string;
   key: string;
   name: string;
+  type: "toggle" | "multiple_variant";
+  status: "draft" | "running" | "completed";
 }
 
 export interface VariantResp {

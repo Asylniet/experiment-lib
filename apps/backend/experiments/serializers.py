@@ -29,6 +29,30 @@ class VariantSerializer(serializers.ModelSerializer):
         fields = ['id', 'key', 'payload', 'rollout', 'experiment', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+    def validate(self, data):
+        """
+        Ensures that toggle experiments only have 'enabled' and 'control' variants.
+        """
+        experiment = data.get("experiment") or self.instance.experiment
+        key = data.get("key", self.instance.key if self.instance else None)
+
+        if experiment.type == "toggle":
+            allowed_keys = {"enabled", "control"}
+
+            # Ensure only "enabled" and "control" variants exist
+            if key not in allowed_keys:
+                raise serializers.ValidationError(f"Toggle experiment variants must be 'enabled' or 'control', not '{key}'.")
+
+            # Count existing variants, excluding the current one (for updates)
+            existing_variants = experiment.variants.exclude(id=self.instance.id if self.instance else None)
+            existing_keys = set(existing_variants.values_list("key", flat=True))
+
+            # Ensure we don't exceed two variants
+            if len(existing_keys) >= 2 and key not in existing_keys:
+                raise serializers.ValidationError("Toggle experiments can only have 'enabled' and 'control' variants.")
+
+        return data
+
 
 class ExperimentSerializer(serializers.ModelSerializer):
     variants = VariantSerializer(many=True, read_only=True)
@@ -40,9 +64,11 @@ class ExperimentSerializer(serializers.ModelSerializer):
             'project', 'variants', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-        extra_kwargs = {
-            'type': {'read_only': True}
-        }
+
+    def update(self, instance, validated_data):
+        # Prevent 'type' from being updated
+        validated_data.pop('type', None)
+        return super().update(instance, validated_data)
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -123,3 +149,36 @@ class UserIdentifierSerializer(UserResponseSerializer, serializers.Serializer):
                 "At least one identifier (device_id, email, or external_id) must be provided"
             )
         return data
+
+
+class BulkVariantUpdateSerializer(serializers.Serializer):
+    """Serializer for bulk updating variants of an experiment."""
+    variants = serializers.ListField(
+        child=serializers.DictField(
+            child=serializers.CharField(allow_null=True, required=False),
+            allow_empty=False
+        ),
+        min_length=1
+    )
+
+    def validate_variants(self, variants):
+        """Validate that the total rollout does not exceed 1.0."""
+        total_rollout = 0
+        for variant in variants:
+            # Check that each variant has id and rollout
+            if 'id' not in variant:
+                raise serializers.ValidationError("Each variant must have an 'id' field")
+
+            if 'rollout' in variant:
+                try:
+                    rollout = float(variant['rollout'])
+                    if rollout < 0:
+                        raise serializers.ValidationError(f"Rollout for variant {variant['id']} cannot be negative")
+                    total_rollout += rollout
+                except ValueError:
+                    raise serializers.ValidationError(f"Invalid rollout value for variant {variant['id']}")
+
+        if total_rollout > 1.0:
+            raise serializers.ValidationError("Total rollout cannot exceed 1.0")
+
+        return variants

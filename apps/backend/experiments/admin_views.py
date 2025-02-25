@@ -1,5 +1,6 @@
 import secrets
 
+from django.db import transaction
 from django.db.models import Sum
 from rest_framework import viewsets, status
 from rest_framework.exceptions import ValidationError
@@ -14,7 +15,7 @@ from experiments.serializers import (
     ExperimentSerializer,
     VariantSerializer,
     ProjectUserSerializer,
-    DistributionSerializer,
+    DistributionSerializer, BulkVariantUpdateSerializer,
 )
 from experiments.services.variant_service import (
     calculate_distribution_stats,
@@ -125,6 +126,58 @@ class AdminExperimentViewSet(AdminViewSetMixin, viewsets.ModelViewSet):
                 'name': experiment.name
             },
             'stats': stats
+        })
+
+    @action(detail=True, methods=['post'])
+    def bulk_update_variants(self, request, pk=None):
+        """
+        Bulk update variants for an experiment.
+        This allows updating multiple variants in a single request.
+        """
+        experiment = self.get_object()
+
+        # Validate incoming data
+        serializer = BulkVariantUpdateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        variants_data = serializer.validated_data['variants']
+        updated_variants = []
+        errors = []
+
+        with transaction.atomic():
+            # Process each variant update
+            for variant_data in variants_data:
+                variant_id = variant_data.pop('id')
+                try:
+                    variant = Variant.objects.get(id=variant_id, experiment=experiment)
+
+                    # Update allowed fields
+                    for field in ['key', 'payload', 'rollout']:
+                        if field in variant_data:
+                            setattr(variant, field, variant_data[field])
+
+                    variant.save()
+                    updated_variants.append(VariantSerializer(variant).data)
+                except Variant.DoesNotExist:
+                    errors.append(f"Variant with id {variant_id} does not exist in this experiment")
+                except Exception as e:
+                    errors.append(f"Error updating variant {variant_id}: {str(e)}")
+
+        # If there were errors, return them
+        if errors:
+            return Response({
+                "errors": errors,
+                "updated_variants": updated_variants
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({
+            "experiment": {
+                "id": str(experiment.id),
+                "key": experiment.key,
+                "name": experiment.name
+            },
+            "updated_variants": updated_variants,
         })
 
 

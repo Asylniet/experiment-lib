@@ -1,4 +1,5 @@
-from django.db import models
+from django.core.exceptions import ValidationError
+from django.db import models, transaction
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
 import uuid
 
@@ -163,6 +164,33 @@ class Experiment(models.Model):
     class Meta:
         unique_together = [['project', 'key']]
 
+    def save(self, *args, **kwargs):
+        """
+        Automatically ensures that toggle experiments have exactly one variant called 'enabled'.
+        """
+        super().save(*args, **kwargs)
+
+        from .models import Variant
+
+        if self.type == "toggle":
+            with transaction.atomic():
+                self.variants.all().delete()
+
+                # Create the single 'enabled' variant
+                Variant.objects.create(
+                    experiment=self,
+                    key="enabled",
+                    rollout=0.5,
+                    payload={}
+                )
+
+                Variant.objects.create(
+                    experiment=self,
+                    key="control",
+                    rollout=0.5,
+                    payload={}
+                )
+
     def __str__(self):
         return f"{self.project.title} - {self.name}"
 
@@ -181,6 +209,30 @@ class Variant(models.Model):
 
     class Meta:
         unique_together = [['experiment', 'key']]
+
+    def clean(self):
+        """
+        Ensures that if the experiment is of type 'toggle', it has exactly two variants:
+        'enabled' and 'control', and no other variants.
+        """
+        if self.experiment.type == "toggle":
+            allowed_keys = {"enabled", "control"}
+
+            # Ensure the variant key is either "enabled" or "control"
+            if self.key not in allowed_keys:
+                raise ValidationError(f"Toggle experiment variants must be 'enabled' or 'control', not '{self.key}'.")
+
+            # Count existing variants, excluding the current one (for updates)
+            existing_variants = self.experiment.variants.exclude(id=self.id)
+            existing_keys = set(existing_variants.values_list("key", flat=True))
+
+            # Ensure we don't exceed the required two variants
+            if len(existing_keys) >= 2 and self.key not in existing_keys:
+                raise ValidationError("Toggle experiments can only have 'enabled' and 'control' variants.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.experiment.name} - {self.key}"

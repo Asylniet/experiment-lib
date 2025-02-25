@@ -222,7 +222,9 @@ class ExperimentConsumer(AsyncJsonWebsocketConsumer):
         experiment_data = {
             'id': str(experiment.id),
             'key': experiment.key,
-            'name': experiment.name
+            'name': experiment.name,
+            'status': experiment.status,
+            'type': experiment.type,
         }
 
         variant_data = {
