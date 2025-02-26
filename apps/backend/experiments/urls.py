@@ -33,7 +33,7 @@ urlpatterns = [
 
     path(
         'admin/experiments/<pk>/variants/',
-        AdminExperimentViewSet.as_view({'patch': 'bulk_update_variants'}),
+        AdminExperimentViewSet.as_view({'put': 'bulk_update_variants'}),
         name='admin-experiment-bulk-update-variants'
     ),
 

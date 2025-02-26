@@ -32,11 +32,16 @@ CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 CORS_ALLOW_HEADERS = [
     "x-api-key",
+    "content-type",
+    "accept",
+    "accept-encoding",
+    "authorization",
 ]
 
 CORS_ALLOW_METHODS = [
     "GET",
     "POST",
+    "PATCH",
     "PUT",
     "DELETE",
     "OPTIONS",

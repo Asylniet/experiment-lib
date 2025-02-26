@@ -181,14 +181,14 @@ class Experiment(models.Model):
                     experiment=self,
                     key="enabled",
                     rollout=0.5,
-                    payload={}
+                    payload=None
                 )
 
                 Variant.objects.create(
                     experiment=self,
                     key="control",
                     rollout=0.5,
-                    payload={}
+                    payload=None
                 )
 
     def __str__(self):
