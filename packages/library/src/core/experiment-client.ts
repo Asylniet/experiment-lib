@@ -41,6 +41,7 @@ export class ExperimentClient {
         },
       ],
     });
+
     this.storageManager = storageManager;
     this.configs = { ...DEFAULT_CONFIGS, ...configs };
 

@@ -20,13 +20,13 @@ export const getComponentUseCode = (
 ) => {
   if (experiment.type === "toggle") {
     return `<ExparoFeatureFlag experimentKey="${experiment.key}" fallback={<span>Not active</span>}>
-  ${withPayload ? "{(payload: { message: string }) => <div>{payload.message}</div>}" : "Active"}
+  ${withPayload ? "{(payload?: { message: string }) => <div>{payload?.message}</div>}" : "Active"}
 </ExparoFeatureFlag>`;
   }
 
   if (withPayload) {
     return `<ExparoVariantRenderer variantKey="${experiment.variants[0].key}">
-  {(payload: { message: string }) => <div>{payload.message}</div>}
+  {(payload?: { message: string }) => <div>{payload?.message}</div>}
 </ExparoVariantRenderer>`;
   }
 

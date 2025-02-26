@@ -43,7 +43,6 @@ export class StorageManager {
     );
 
     if (!parsedVariants.success) {
-      console.error("Error parsing variants", parsedVariants.error);
       return null;
     }
 

@@ -37,25 +37,32 @@ function ExparoVariants<T>({
   );
 }
 
-type ExparoVariantInnerProps<T> = Omit<ExparoVariantsProps, "experimentKey"> & {
+type ExparoVariantInnerProps<T> = React.PropsWithChildren<{
+  fallback: React.ReactNode;
+  loading: React.ReactNode;
   value: UseGetVariantReturnType<T>;
-};
+}>;
 
 function ExparoVariantInner<T>({
   value,
   fallback,
   loading,
   children,
-}: ExparoVariantInnerProps<T>) {
-  if (!value || !value.isRunning) {
-    return fallback;
+}: ExparoVariantInnerProps<T>): React.ReactElement | null {
+  // Checking for JSX because there was an error:
+  // 'ExparoVariantInner' cannot be used as a JSX component.
+  // Its return type 'Element | null' is not a valid JSX element.
+  // Type 'undefined' is not assignable to type 'Element | null'
+
+  if (!value || !value.variant || !value.isRunning) {
+    return React.isValidElement(fallback) ? fallback : <>{fallback}</>;
   }
 
   if (value.isLoading && loading) {
-    return loading;
+    return React.isValidElement(loading) ? loading : <>{loading}</>;
   }
 
-  return children;
+  return <>{children}</>;
 }
 
 function useExparoVariantsContext<T>() {
