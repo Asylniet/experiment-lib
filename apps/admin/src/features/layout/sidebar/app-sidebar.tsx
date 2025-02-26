@@ -18,7 +18,7 @@ import {
 } from "@/features/ui/sidebar";
 import { useQuery } from "@tanstack/react-query";
 import { projectQueries } from "@/services/queries/project.ts";
-import { ChevronRight, CirclePlus, Plus } from "lucide-react";
+import { ChevronRight, CirclePlus, LogOut, Plus } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -27,11 +27,14 @@ import {
 import { Link, useParams } from "@tanstack/react-router";
 import AddProjectDialog from "@/features/project/add-project-dialog.tsx";
 import CreateExperimentDialog from "@/features/experiment/create-experiment-dialog.tsx";
+import { useAuth } from "@/features/layout/auth/auth-context.tsx";
 
 const AppSidebar = () => {
   const { data, status } = useQuery(projectQueries.getProjects());
   const projectId = useParams({ strict: false }).projectId;
   const experimentId = useParams({ strict: false }).experimentId;
+
+  const auth = useAuth();
 
   return (
     <Sidebar>
@@ -133,7 +136,16 @@ const AppSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter />
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton className="cursor-pointer" onClick={auth.logout}>
+              <LogOut className="h-4 w-4" />
+              Logout
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 };

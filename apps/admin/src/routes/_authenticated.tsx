@@ -28,18 +28,6 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthLayout() {
   const auth = useAuth();
 
-  if (auth.getStatus() === "loading") {
-    return (
-      <div className="w-full min-h-screen flex items-center justify-center">
-        Авторизация...
-      </div>
-    );
-  }
-
-  if (auth.getStatus() === "unauthenticated") {
-    return <Navigate to="/login" />;
-  }
-
   const navigate = useNavigate();
 
   React.useEffect(() => {
@@ -64,6 +52,18 @@ function AuthLayout() {
       );
     };
   }, []);
+
+  if (auth.getStatus() === "loading") {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center">
+        Авторизация...
+      </div>
+    );
+  }
+
+  if (auth.getStatus() === "unauthenticated") {
+    return <Navigate to="/login" />;
+  }
 
   return (
     <SidebarProvider>

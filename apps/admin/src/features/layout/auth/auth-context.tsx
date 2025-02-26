@@ -1,5 +1,6 @@
 import * as React from "react";
 import { getTokens, removeTokens } from "@/lib/token.ts";
+import { authStateChangeEvent } from "@/lib/events.ts";
 
 type AuthContext = {
   logout: () => Promise<void>;
@@ -29,6 +30,7 @@ type AuthProviderProps = React.PropsWithChildren;
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = React.useCallback(async () => {
     removeTokens();
+    window.dispatchEvent(authStateChangeEvent.dispatch("unauthenticated"));
   }, []);
 
   return (
