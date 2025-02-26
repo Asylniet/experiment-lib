@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { experimentAPI } from "@/services/api/experiment.ts";
 import { toast } from "sonner";
 import { projectQueries } from "@/services/queries/project.ts";
-import type { Experiment } from "@/schemas/experiment.ts";
 import type { Project } from "@/schemas/projects.ts";
 
 type UseUpdateVariantProps = {

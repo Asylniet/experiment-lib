@@ -130,10 +130,10 @@ importers:
         specifier: ^1.26.5
         version: 1.26.5
       '@types/react':
-        specifier: ^19.0.8
+        specifier: ^19.0.0
         version: 19.0.10
       '@types/react-dom':
-        specifier: ^19.0.3
+        specifier: ^19.0.0
         version: 19.0.4(@types/react@19.0.10)
       '@vitejs/plugin-react':
         specifier: ^4.3.4
@@ -185,10 +185,10 @@ importers:
         specifier: ^16.2.0
         version: 16.2.0(@testing-library/dom@10.4.0)(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@types/react':
-        specifier: ^19.0.8
+        specifier: ^19.0.0
         version: 19.0.10
       '@types/react-dom':
-        specifier: ^19.0.3
+        specifier: ^19.0.0
         version: 19.0.4(@types/react@19.0.10)
       '@vitejs/plugin-react':
         specifier: ^4.3.4
@@ -262,10 +262,10 @@ importers:
         version: 6.6.3
       '@testing-library/react':
         specifier: ^16.2.0
-        version: 16.2.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)
+        version: 16.2.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@testing-library/react-hooks':
         specifier: ^8.0.1
-        version: 8.0.1(@types/react@18.3.18)
+        version: 8.0.1(@types/react@18.3.18)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@testing-library/user-event':
         specifier: ^14.6.1
         version: 14.6.1(@testing-library/dom@10.4.0)
@@ -6004,17 +6004,21 @@ snapshots:
       lodash: 4.17.21
       redent: 3.0.0
 
-  '@testing-library/react-hooks@8.0.1(@types/react@18.3.18)':
+  '@testing-library/react-hooks@8.0.1(@types/react@18.3.18)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
       '@babel/runtime': 7.26.9
-      react-error-boundary: 3.1.4
+      react: 19.0.0
+      react-error-boundary: 3.1.4(react@19.0.0)
     optionalDependencies:
       '@types/react': 18.3.18
+      react-dom: 19.0.0(react@19.0.0)
 
-  '@testing-library/react@16.2.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)':
+  '@testing-library/react@16.2.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
       '@babel/runtime': 7.26.9
       '@testing-library/dom': 10.4.0
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
     optionalDependencies:
       '@types/react': 18.3.18
       '@types/react-dom': 18.3.5(@types/react@18.3.18)
@@ -7667,9 +7671,10 @@ snapshots:
       react: 19.0.0
       scheduler: 0.25.0
 
-  react-error-boundary@3.1.4:
+  react-error-boundary@3.1.4(react@19.0.0):
     dependencies:
       '@babel/runtime': 7.26.9
+      react: 19.0.0
 
   react-hook-form@7.54.2(react@19.0.0):
     dependencies:
