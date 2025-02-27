@@ -8,9 +8,19 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - static_files:/static
       - media_files:/media
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
     depends_on:
       - backend
       - admin
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
   db:
     image: postgres:15
@@ -47,9 +57,9 @@ services:
       context: ./apps/backend
       dockerfile: Dockerfile
     volumes:
-      - ./apps/backend:/app
-      - static_files:/app/staticfiles
-      - media_files:/app/media
+      - ./apps/backend:/backend
+      - static_files:/backend/staticfiles
+      - media_files:/backend/media
     ports:
       - "8000:8000"
     env_file:
@@ -72,12 +82,23 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: admin
     env_file:
       - ./.env
     expose:
       - "80"
     depends_on:
       - backend
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: web
+    env_file:
+      - ./.env
+    expose:
+      - "80"
 
 volumes:
   postgres_data:

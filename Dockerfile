@@ -1,36 +1,34 @@
-FROM node:18-alpine AS build
+FROM node:18-alpine AS base
 
-# Set working directory
 WORKDIR /app
 
-# Install dependencies for node-gyp and other native modules
 RUN apk add --no-cache python3 make g++ git
 
 RUN npm install -g pnpm
 
-COPY . .
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY apps/admin/package.json ./apps/admin/
+COPY apps/web/package.json ./apps/web/
+COPY packages ./packages
 
 RUN pnpm install
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+COPY . .
 
-RUN  npm run build
+FROM base AS admin-build
+RUN pnpm run build --filter=admin
 
-# Production stage with Nginx
-FROM nginx:alpine
+FROM base AS web-build
+RUN pnpm run build --filter=web
 
-# Install bash for better shell scripts
-RUN apk add --no-cache bash
-
-# Copy built assets from builder stage
-COPY --from=build /app/apps/admin/dist /usr/share/nginx/html
-
-# Copy nginx configuration
+FROM nginx:alpine AS admin
+COPY --from=admin-build /app/apps/admin/dist /usr/share/nginx/admin
 COPY ./apps/admin/nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expose port
 EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
 
-# Start Nginx
+FROM nginx:alpine AS web
+COPY --from=web-build /app/apps/web/dist /usr/share/nginx/web
+COPY ./apps/web/nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
