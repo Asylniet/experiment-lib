@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    optionalDependencies:
+      '@rollup/rollup-linux-arm64-musl':
+        specifier: latest
+        version: 4.36.0
     devDependencies:
       prettier:
         specifier: ^3.5.3
@@ -65,6 +69,9 @@ importers:
       '@tanstack/react-router':
         specifier: ^1.104.1
         version: 1.112.11(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      axios:
+        specifier: ^1.7.9
+        version: 1.8.1
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1752,6 +1759,11 @@ packages:
 
   '@rollup/rollup-linux-arm64-musl@4.34.9':
     resolution: {integrity: sha512-LD2fytxZJZ6xzOKnMbIpgzFOuIKlxVOpiMAXawsAZ2mHBPEYOnLRK5TTEsID6z4eM23DuO88X0Tq1mErHMVq0A==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@rollup/rollup-linux-arm64-musl@4.36.0':
+    resolution: {integrity: sha512-QiGnhScND+mAAtfHqeT+cB1S9yFnNQ/EwCg5yE3MzoaZZnIV0RV9O5alJAoJKX/sBONVKeZdMfO8QSaWEygMhw==}
     cpu: [arm64]
     os: [linux]
 
@@ -5786,6 +5798,9 @@ snapshots:
     optional: true
 
   '@rollup/rollup-linux-arm64-musl@4.34.9':
+    optional: true
+
+  '@rollup/rollup-linux-arm64-musl@4.36.0':
     optional: true
 
   '@rollup/rollup-linux-loongarch64-gnu@4.34.9':

@@ -1,6 +1,17 @@
-version: '3.8'
-
 services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - static_files:/static
+      - media_files:/media
+    depends_on:
+      - backend
+      - admin
+
   db:
     image: postgres:15
     volumes:
@@ -31,12 +42,12 @@ services:
       timeout: 5s
       retries: 5
 
-  web:
+  backend:
     build:
-      context: .
+      context: ./apps/backend
       dockerfile: Dockerfile
     volumes:
-      - .:/app
+      - ./apps/backend:/app
       - static_files:/app/staticfiles
       - media_files:/app/media
     ports:
@@ -56,6 +67,17 @@ services:
              python manage.py collectstatic --noinput &&
              python manage.py create_admin --email ${ADMIN_EMAIL} --password ${ADMIN_PASSWORD} &&
              daphne -b 0.0.0.0 -p 8000 backend.asgi:application"
+
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    expose:
+      - "80"
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
