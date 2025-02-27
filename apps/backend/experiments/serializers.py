@@ -1,7 +1,7 @@
 import secrets
 
 from rest_framework import serializers
-from .models import Project, Experiment, Variant, ProjectUser, Distribution, AdminUser
+from experiments.models import Project, Experiment, Variant, ProjectUser, Distribution, AdminUser
 
 
 class AdminUserSerializer(serializers.ModelSerializer):

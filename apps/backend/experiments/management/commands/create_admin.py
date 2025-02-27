@@ -3,11 +3,11 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 import getpass
 
-from ...models import AdminUser
+from experiments.models import AdminUser
 
 
 class Command(BaseCommand):
-    help = 'Create a new admin user and optionally a project with API key'
+    help = 'Create a new admin user'
 
     def add_arguments(self, parser):
         parser.add_argument('--email', type=str, help='Email address for the admin user')

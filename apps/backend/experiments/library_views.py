@@ -1,13 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.shortcuts import get_object_or_404
 from django.http import Http404
 
-from .authentication import APIKeyAuthentication
-from .models import Experiment, ProjectUser
-from .serializers import UserIdentifierSerializer, ExperimentVariantResponseSerializer, UserResponseSerializer
-from .services.variant_service import (
+from experiments.authentication import APIKeyAuthentication
+from experiments.models import Experiment
+from experiments.serializers import UserIdentifierSerializer, ExperimentVariantResponseSerializer, UserResponseSerializer
+from experiments.services.variant_service import (
     get_or_create_user,
     get_or_create_distribution,
     get_experiment_by_key

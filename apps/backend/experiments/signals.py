@@ -4,8 +4,8 @@ from django.db import transaction
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
-from .models import Variant, Distribution
-from .services.variant_service import recalculate_experiment_distributions
+from experiments.models import Variant, Distribution
+from experiments.services.variant_service import recalculate_experiment_distributions
 
 
 @receiver(post_save, sender=Variant)

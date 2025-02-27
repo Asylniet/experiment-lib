@@ -1,9 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
+from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.base_user import BaseUserManager
 import uuid
-
-from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
@@ -49,12 +48,12 @@ class AdminUser(AbstractUser):
 
     groups = models.ManyToManyField(
         Group,
-        related_name="adminuser_set",
+        related_name="adminuser_groups",
         blank=True
     )
     user_permissions = models.ManyToManyField(
         Permission,
-        related_name="adminuser_set",
+        related_name="adminuser_permissions",
         blank=True
     )
 
@@ -169,8 +168,6 @@ class Experiment(models.Model):
         Automatically ensures that toggle experiments have exactly one variant called 'enabled'.
         """
         super().save(*args, **kwargs)
-
-        from .models import Variant
 
         if self.type == "toggle":
             with transaction.atomic():

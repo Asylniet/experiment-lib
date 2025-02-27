@@ -2,18 +2,18 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from .admin_views import (
+from experiments.admin_views import (
     AdminProjectViewSet,
     AdminExperimentViewSet,
     AdminVariantViewSet,
     AdminProjectUserViewSet,
     AdminDistributionViewSet
 )
-from .library_views import (
+from experiments.library_views import (
     ExperimentVariantAPIView,
     UserExperimentsAPIView, UserIdentifyAPIView
 )
-from .token_views import CustomTokenObtainPairView
+from experiments.token_views import CustomTokenObtainPairView
 
 # Create a router for admin viewsets
 admin_router = DefaultRouter()
