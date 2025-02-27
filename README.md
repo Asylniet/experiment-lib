@@ -87,6 +87,12 @@ To use the library read the documentation in the [docs](https://github.com/asyln
 
 To deploy the application you need Docker and Docker Compose.
 
+1. Change the .env file to your needs. ALLOWED_HOSTS is the hosts you want to use.
+2. If you want to configure SSL certificates:
+    1. Run `chmod +x ./init-letsencrypt.sh`
+    2. Run `./init-letsencrypt.sh -e <email> -d <domain1> -d <domain2> -d <domain3>...`
+   3. Change the ./nginx/conf.d/${your-domain}.conf files to your needs.
+
 Run:
 
 ```bash
