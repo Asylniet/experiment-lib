@@ -33,13 +33,17 @@ const HowToUse: React.FC<HowToUseProps> = ({ experiment }) => {
             language="tsx"
             showLineNumbers
           />
-          <Separator />
-          <p>Also you can use it with payload:</p>
-          <CodeBlock
-            code={getComponentUseCode(experiment, true)}
-            language="tsx"
-            showLineNumbers
-          />
+          {experiment.variants.length > 0 && (
+            <>
+              <Separator />
+              <p>Also you can use it with payload:</p>
+              <CodeBlock
+                code={getComponentUseCode(experiment, true)}
+                language="tsx"
+                showLineNumbers
+              />
+            </>
+          )}
         </div>
       ),
       hook: (
@@ -70,13 +74,17 @@ const HowToUse: React.FC<HowToUseProps> = ({ experiment }) => {
             language="tsx"
             showLineNumbers
           />
-          <Separator />
-          <p>Also you can use renderer with payload:</p>
-          <CodeBlock
-            code={getComponentUseCode(experiment, true)}
-            language="tsx"
-            showLineNumbers
-          />
+          {experiment.variants.length > 0 && (
+            <>
+              <Separator />
+              <p>Also you can use renderer with payload:</p>
+              <CodeBlock
+                code={getComponentUseCode(experiment, true)}
+                language="tsx"
+                showLineNumbers
+              />
+            </>
+          )}
         </div>
       ),
       hook: (

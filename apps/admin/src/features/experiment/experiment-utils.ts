@@ -25,6 +25,8 @@ export const getComponentUseCode = (
   }
 
   if (withPayload) {
+    if (experiment.variants.length < 1) return "";
+
     return `<ExparoVariantRenderer variantKey="${experiment.variants[0].key}">
   {(payload?: { message: string }) => <div>{payload?.message}</div>}
 </ExparoVariantRenderer>`;
@@ -44,7 +46,7 @@ ${experiment.variants
 
 export const getHookUseCode = (experiment: Experiment) => {
   if (experiment.type === "toggle") {
-    return `function RouteComponent() {
+    return `function SampleComponent() {
   const {
     isEnabled,
     isLoading,
@@ -100,7 +102,7 @@ export const getHookUseCode = (experiment: Experiment) => {
 ${experiment.variants
   .map(
     (variant) =>
-      `      {variant.key === "${variant.key}" && <div>Variant ${variant.key}</div>}`,
+      `      {variant?.key === "${variant.key}" && <div>Variant ${variant.key}</div>}`,
   )
   .join("\n")}
       {payload && <div>{payload.message}</div>}

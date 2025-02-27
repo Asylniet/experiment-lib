@@ -12,7 +12,10 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as VariantsImport } from './routes/variants'
-import { Route as FeatureFlagImport } from './routes/feature-flag'
+import { Route as FeatureFlagHookImport } from './routes/feature-flag-hook'
+import { Route as FeatureFlagComponentImport } from './routes/feature-flag-component'
+import { Route as AbnTestHookImport } from './routes/abn-test-hook'
+import { Route as AbnTestComponentImport } from './routes/abn-test-component'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
@@ -23,9 +26,27 @@ const VariantsRoute = VariantsImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const FeatureFlagRoute = FeatureFlagImport.update({
-  id: '/feature-flag',
-  path: '/feature-flag',
+const FeatureFlagHookRoute = FeatureFlagHookImport.update({
+  id: '/feature-flag-hook',
+  path: '/feature-flag-hook',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const FeatureFlagComponentRoute = FeatureFlagComponentImport.update({
+  id: '/feature-flag-component',
+  path: '/feature-flag-component',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AbnTestHookRoute = AbnTestHookImport.update({
+  id: '/abn-test-hook',
+  path: '/abn-test-hook',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AbnTestComponentRoute = AbnTestComponentImport.update({
+  id: '/abn-test-component',
+  path: '/abn-test-component',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -46,11 +67,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/feature-flag': {
-      id: '/feature-flag'
-      path: '/feature-flag'
-      fullPath: '/feature-flag'
-      preLoaderRoute: typeof FeatureFlagImport
+    '/abn-test-component': {
+      id: '/abn-test-component'
+      path: '/abn-test-component'
+      fullPath: '/abn-test-component'
+      preLoaderRoute: typeof AbnTestComponentImport
+      parentRoute: typeof rootRoute
+    }
+    '/abn-test-hook': {
+      id: '/abn-test-hook'
+      path: '/abn-test-hook'
+      fullPath: '/abn-test-hook'
+      preLoaderRoute: typeof AbnTestHookImport
+      parentRoute: typeof rootRoute
+    }
+    '/feature-flag-component': {
+      id: '/feature-flag-component'
+      path: '/feature-flag-component'
+      fullPath: '/feature-flag-component'
+      preLoaderRoute: typeof FeatureFlagComponentImport
+      parentRoute: typeof rootRoute
+    }
+    '/feature-flag-hook': {
+      id: '/feature-flag-hook'
+      path: '/feature-flag-hook'
+      fullPath: '/feature-flag-hook'
+      preLoaderRoute: typeof FeatureFlagHookImport
       parentRoute: typeof rootRoute
     }
     '/variants': {
@@ -67,41 +109,75 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/feature-flag': typeof FeatureFlagRoute
+  '/abn-test-component': typeof AbnTestComponentRoute
+  '/abn-test-hook': typeof AbnTestHookRoute
+  '/feature-flag-component': typeof FeatureFlagComponentRoute
+  '/feature-flag-hook': typeof FeatureFlagHookRoute
   '/variants': typeof VariantsRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/feature-flag': typeof FeatureFlagRoute
+  '/abn-test-component': typeof AbnTestComponentRoute
+  '/abn-test-hook': typeof AbnTestHookRoute
+  '/feature-flag-component': typeof FeatureFlagComponentRoute
+  '/feature-flag-hook': typeof FeatureFlagHookRoute
   '/variants': typeof VariantsRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/feature-flag': typeof FeatureFlagRoute
+  '/abn-test-component': typeof AbnTestComponentRoute
+  '/abn-test-hook': typeof AbnTestHookRoute
+  '/feature-flag-component': typeof FeatureFlagComponentRoute
+  '/feature-flag-hook': typeof FeatureFlagHookRoute
   '/variants': typeof VariantsRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/feature-flag' | '/variants'
+  fullPaths:
+    | '/'
+    | '/abn-test-component'
+    | '/abn-test-hook'
+    | '/feature-flag-component'
+    | '/feature-flag-hook'
+    | '/variants'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/feature-flag' | '/variants'
-  id: '__root__' | '/' | '/feature-flag' | '/variants'
+  to:
+    | '/'
+    | '/abn-test-component'
+    | '/abn-test-hook'
+    | '/feature-flag-component'
+    | '/feature-flag-hook'
+    | '/variants'
+  id:
+    | '__root__'
+    | '/'
+    | '/abn-test-component'
+    | '/abn-test-hook'
+    | '/feature-flag-component'
+    | '/feature-flag-hook'
+    | '/variants'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  FeatureFlagRoute: typeof FeatureFlagRoute
+  AbnTestComponentRoute: typeof AbnTestComponentRoute
+  AbnTestHookRoute: typeof AbnTestHookRoute
+  FeatureFlagComponentRoute: typeof FeatureFlagComponentRoute
+  FeatureFlagHookRoute: typeof FeatureFlagHookRoute
   VariantsRoute: typeof VariantsRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  FeatureFlagRoute: FeatureFlagRoute,
+  AbnTestComponentRoute: AbnTestComponentRoute,
+  AbnTestHookRoute: AbnTestHookRoute,
+  FeatureFlagComponentRoute: FeatureFlagComponentRoute,
+  FeatureFlagHookRoute: FeatureFlagHookRoute,
   VariantsRoute: VariantsRoute,
 }
 
@@ -116,15 +192,27 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/feature-flag",
+        "/abn-test-component",
+        "/abn-test-hook",
+        "/feature-flag-component",
+        "/feature-flag-hook",
         "/variants"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/feature-flag": {
-      "filePath": "feature-flag.tsx"
+    "/abn-test-component": {
+      "filePath": "abn-test-component.tsx"
+    },
+    "/abn-test-hook": {
+      "filePath": "abn-test-hook.tsx"
+    },
+    "/feature-flag-component": {
+      "filePath": "feature-flag-component.tsx"
+    },
+    "/feature-flag-hook": {
+      "filePath": "feature-flag-hook.tsx"
     },
     "/variants": {
       "filePath": "variants.tsx"

@@ -149,7 +149,7 @@ function MyComponent() {
 
   return (
     <div>
-      {variant.key === "A" ? "Variant A" : "Variant B"}
+      {variant?.key === "A" ? "Variant A" : "Variant B"}
       {payload && <div>{payload.message}</div>}
     </div>
   );

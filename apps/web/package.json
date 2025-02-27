@@ -8,12 +8,13 @@
     "serve": "vite preview"
   },
   "dependencies": {
+    "@repo/exparo": "workspace:*",
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-router": "^1.104.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.0.6",
-    "@repo/exparo": "workspace:*"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@tanstack/router-devtools": "^1.112.11",

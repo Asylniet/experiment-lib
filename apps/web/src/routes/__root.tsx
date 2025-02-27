@@ -1,14 +1,15 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { ExperimentClientProvider } from "@repo/exparo";
+import { env } from "@/lib/env.ts";
 
 export const Route = createRootRoute({
   component: () => (
     <ExperimentClientProvider
-      apiKey="0b4aa9f1be74a3583643cad1ba72df8a"
-      host="http://localhost:8000"
+      apiKey={env().VITE_API_KEY}
+      host={env().VITE_HOST}
     >
-      <hr />
+      <Link to="/">Home</Link>
       <Outlet />
       <TanStackRouterDevtools />
     </ExperimentClientProvider>
