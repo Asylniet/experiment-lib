@@ -28,6 +28,8 @@ pnpm run dev --filter=admin
 
 This will start the admin panel on http://localhost:5174. You can login with the credentials from the `.env` file: ADMIN_EMAIL and ADMIN_PASSWORD.
 
+Also you can test hosted admin panel on https://exparo.assylniet.kz
+
 ---
 
 ## Backend
@@ -66,6 +68,8 @@ pnpm run dev
 ```
 
 This will start all applications and run build for library in watch mode. That is slightly faster than building library on every change
+
+Also you can test hosted demo website on https://exparo-demo.assylniet.kz
 
 ---
 
