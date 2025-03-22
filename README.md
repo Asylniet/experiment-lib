@@ -83,7 +83,7 @@ You can't exactly run the library locally. Since it is a package, it can't be ru
 
 ### Usage
 
-To use the library read the documentation in the [docs](https://github.com/asylniet/experiment-lib/tree/main/DOCS.md).
+To use the library read the documentation in the [docs](https://github.com/asylniet/experiment-lib/tree/main/packages/library/DOCS.md).
 
 ---
 

@@ -5,7 +5,7 @@ First you need to install the library:
 ## Installation
 
 ```bash
-npm install @exparo/library
+npm install exparo
 ```
 
 ## Setup
@@ -13,7 +13,7 @@ npm install @exparo/library
 You need to wrap your application with the `ExparoProvider` component:
 
 ```tsx
-import { ExparoProvider } from "@exparo/library";
+import { ExparoProvider } from "exparo";
 
 function App() {
   return (
@@ -30,7 +30,7 @@ function App() {
 Also you can provide more configuration options:
 
 ```tsx
-import { ExparoProvider } from "@exparo/library";
+import { ExparoProvider } from "exparo";
 
 function App() {
   return (
@@ -71,7 +71,7 @@ Feature flag is a simple experiment that allows you to enable or disable a featu
 To use feature flag you need to create a feature flag experiment in the admin panel. Then you can use it in your application like this:
 
 ```tsx
-import { useFeatureFlag } from "@exparo/library";
+import { useFeatureFlag } from "exparo";
 
 function MyComponent() {
   const { isEnabled, isLoading, error, refresh, isRunning } = useFeatureFlag<{
@@ -102,7 +102,7 @@ function MyComponent() {
 Or can use `ExparoFeatureFlag` component:
 
 ```tsx
-import { ExparoFeatureFlag } from "@exparo/library";
+import { ExparoFeatureFlag } from "exparo";
 
 function MyComponent() {
   return (
@@ -128,7 +128,7 @@ To use A/B/N testing you need to create an A/B/N testing experiment in the admin
 Then you can use it in your application like this:
 
 ```tsx
-import { useGetVariant } from "@exparo/library";
+import { useGetVariant } from "exparo";
 
 function MyComponent() {
   const { variant, isLoading, error, refresh, isRunning } = useGetVariant<{
@@ -159,7 +159,7 @@ function MyComponent() {
 Or can use `ExparoVariants` component:
 
 ```tsx
-import { ExparoVariants, ExparoVariantRenderer } from "@exparo/library";
+import { ExparoVariants, ExparoVariantRenderer } from "exparo";
 
 function MyComponent() {
   return (
